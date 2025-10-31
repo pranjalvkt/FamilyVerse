@@ -29,7 +29,7 @@ jobs:
       # Install and lint frontend
       - name: Install frontend dependencies
         working-directory: ./client
-        run: npm ci
+        run: npm install
 
       - name: Lint frontend
         working-directory: ./client
@@ -38,7 +38,7 @@ jobs:
       # Install and test backend
       - name: Install backend dependencies
         working-directory: ./server
-        run: npm ci
+        run: npm install
 
       - name: Run backend tests
         working-directory: ./server
