@@ -17,11 +17,9 @@ jobs:
         node-version: [20.11.0]
 
     steps:
-      # --------- Checkout Code ---------
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # --------- Setup Node Environment ---------
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
@@ -31,7 +29,7 @@ jobs:
             client/package-lock.json
             server/package-lock.json
 
-      # --------- FRONTEND (Next.js) ---------
+      # ---------- FRONTEND ----------
       - name: Install frontend dependencies
         working-directory: ./client
         run: npm ci || npm install
@@ -44,7 +42,7 @@ jobs:
         working-directory: ./client
         run: npm run build
 
-      # --------- BACKEND (Node.js) ---------
+      # ---------- BACKEND ----------
       - name: Install backend dependencies
         working-directory: ./server
         run: npm ci || npm install
@@ -53,19 +51,18 @@ jobs:
         working-directory: ./server
         run: npm test || echo "No tests yet"
 
-      # --------- DEPLOY FRONTEND to Vercel ---------
+      # ---------- DEPLOYMENTS ----------
       - name: Deploy to Vercel (Frontend)
         if: github.ref == 'refs/heads/main' && success()
+        working-directory: ./client
         run: |
           echo "🚀 Deploying Next.js app to Vercel..."
-          cd client
           npx vercel deploy --prod --yes --token ${{ secrets.VERCEL_TOKEN }}
 
-      # --------- DEPLOY BACKEND to Render ---------
       - name: Deploy to Render (Backend)
         if: github.ref == 'refs/heads/main' && success()
         env:
           RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
         run: |
-          echo "🚀 Triggering Render deployment..."
+          echo "🚀 Triggering Render deploy..."
           curl -X POST "$RENDER_DEPLOY_HOOK"
