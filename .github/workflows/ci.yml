@@ -54,9 +54,9 @@ jobs:
       # ---------- DEPLOYMENTS ----------
       - name: Deploy to Vercel (Frontend)
         if: github.ref == 'refs/heads/main' && success()
+        working-directory: ./client
         run: |
           echo "🚀 Deploying Next.js app to Vercel..."
-          cd client
           npx vercel deploy --prod --yes --token ${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Render (Backend)
