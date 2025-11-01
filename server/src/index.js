@@ -15,12 +15,11 @@ app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(logger);
 
-// ✅ Mount REST routes
-app.use("/api/test", testRoutes);
+
 app.get("/", (req, res) => res.send("FamilyVerse backend running 🚀"));
+app.use("/api/test", testRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/health", healthRoutes);
-
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
