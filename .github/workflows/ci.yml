@@ -27,24 +27,27 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
 
-      # ---------- 3. Frontend Build ----------
+      # ---------- 3. Frontend ----------
       - name: Install frontend dependencies
+        working-directory: ./client
         run: npm ci || npm install
-        working-directory: client
 
       - name: Build frontend
+        working-directory: ./client
         run: npm run build
-        working-directory: client
 
-      # ---------- 4. Backend Build/Test ----------
+      # ---------- 4. Backend ----------
       - name: Install backend dependencies
+        working-directory: ./server
         run: npm ci || npm install
-        working-directory: server
 
       - name: Run backend tests
+        working-directory: ./server
         run: npm test || echo "⚠️ No backend tests configured"
-        working-directory: server
 
       # ---------- 5. Deploy Frontend to Vercel ----------
       - name: Deploy Frontend to Vercel
@@ -52,7 +55,8 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          echo "🚀 Deploying Next.js app to Vercel"
+          echo "🚀 Deploying Next.js app to Vercel..."
+          cd client
           npx vercel pull --yes --environment=production --token $VERCEL_TOKEN
           npx vercel build --token $VERCEL_TOKEN
           npx vercel deploy --prebuilt --prod --yes --token $VERCEL_TOKEN
