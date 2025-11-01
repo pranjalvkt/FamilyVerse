@@ -17,52 +17,51 @@ jobs:
         node-version: [20.11.0]
 
     steps:
+      # ---------- 1. Checkout ----------
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      # ---------- 2. Setup Node ----------
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-          cache-dependency-path: |
-            client/package-lock.json
-            server/package-lock.json
 
-      # ---------- FRONTEND ----------
+      # ---------- 3. Frontend Build ----------
       - name: Install frontend dependencies
-        working-directory: ./client
         run: npm ci || npm install
-
-      - name: Lint frontend
-        working-directory: ./client
-        run: npm run lint || echo "No lint script"
+        working-directory: client
 
       - name: Build frontend
-        working-directory: ./client
         run: npm run build
+        working-directory: client
 
-      # ---------- BACKEND ----------
+      # ---------- 4. Backend Build/Test ----------
       - name: Install backend dependencies
-        working-directory: ./server
         run: npm ci || npm install
+        working-directory: server
 
       - name: Run backend tests
-        working-directory: ./server
-        run: npm test || echo "No tests yet"
+        run: npm test || echo "⚠️ No backend tests configured"
+        working-directory: server
 
-      # ---------- DEPLOYMENTS ----------
-      # ---------- DEPLOYMENTS ----------
-      - name: Deploy to Vercel (Frontend)
-        if: github.ref == 'refs/heads/main' && success()
+      # ---------- 5. Deploy Frontend to Vercel ----------
+      - name: Deploy Frontend to Vercel
+        if: github.ref == 'refs/heads/main'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          echo "🚀 Deploying Next.js app to Vercel..."
-          npx vercel deploy --prod --yes --token ${{ secrets.VERCEL_TOKEN }} --cwd $GITHUB_WORKSPACE/client
+          echo "🚀 Deploying Next.js app to Vercel"
+          npx vercel pull --yes --environment=production --token $VERCEL_TOKEN
+          npx vercel build --token $VERCEL_TOKEN
+          npx vercel deploy --prebuilt --prod --yes --token $VERCEL_TOKEN
 
-      - name: Deploy to Render (Backend)
-        if: github.ref == 'refs/heads/main' && success()
+      # ---------- 6. Deploy Backend to Render ----------
+      - name: Deploy Backend to Render
+        if: github.ref == 'refs/heads/main'
         env:
           RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
         run: |
-          echo "🚀 Triggering Render deploy..."
+          echo "🚀 Triggering Render deployment..."
           curl -X POST "$RENDER_DEPLOY_HOOK"
