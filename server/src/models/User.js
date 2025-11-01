@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
   name: { type: String, trim: true },
   email: { type: String, unique: true, required: true, lowercase: true },
-  image: { type: String },
+  image: { type: String, default: "" },
   password: { type: String, select: false }, // only for manual login
   role: { 
     type: String, 
@@ -11,6 +11,8 @@ const userSchema = new mongoose.Schema({
     default: "viewer" 
   },
   createdAt: { type: Date, default: Date.now },
+  location: { type: String, default: "" },
+  bio: { type: String, default: "" },
 });
 
 export default mongoose.model("User", userSchema);

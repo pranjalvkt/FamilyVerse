@@ -2,6 +2,15 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
+// Helper: generate JWT
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user._id, email: user.email, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+};
+
 // ---------- Normal Email/Password Auth ----------
 export const registerUser = async (req, res) => {
   try {
@@ -13,9 +22,9 @@ export const registerUser = async (req, res) => {
     }
 
     const hashed = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashed });
-
-    res.status(201).json({ message: "User registered", user });
+    const user = await User.create({ name, email, password: hashed, role: "viewer" });
+    const token = generateToken(user);
+    res.status(201).json({ message: "User registered", token, user });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -24,14 +33,13 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    const user = await User.findOne({ email });
+    
+    const user = await User.findOne({ email }).select("+password");
     if (!user) return res.status(404).json({ error: "User not found" });
-
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    const token = generateToken(user);
     res.json({ token, user });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -62,7 +70,9 @@ export const authWithProvider = async (req, res) => {
       console.log("ℹ️ Existing OAuth user logged in:", email);
     }
 
-    res.status(200).json({ message: "User authenticated", user });
+    // 🪪 Generate JWT for this OAuth user
+    const token = generateToken(user);
+    res.status(200).json({ message: "User authenticated", token, user });
   } catch (err) {
     console.error("❌ OAuth Auth Error:", err);
     res.status(500).json({ error: err.message });

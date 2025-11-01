@@ -5,6 +5,8 @@ import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import testRoutes from "./routes/testRoutes.js";
 import healthRoutes from "./routes/healthRoutes.js"
+import userRoutes from "./routes/userRoutes.js";
+
 import { logger } from "./middleware/logger.js";
 
 dotenv.config();
@@ -20,6 +22,7 @@ app.get("/", (req, res) => res.send("FamilyVerse backend running 🚀"));
 app.use("/api/test", testRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/health", healthRoutes);
+app.use("/api/user", userRoutes);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
