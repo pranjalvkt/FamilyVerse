@@ -17,11 +17,11 @@ jobs:
         node-version: [20.11.0]
 
     steps:
-      # Checkout Code
+      # --------- Checkout Code ---------
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Setup Node.js
+      # --------- Setup Node Environment ---------
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
@@ -31,16 +31,7 @@ jobs:
             client/package-lock.json
             server/package-lock.json
 
-      # Cache Next.js build
-      - name: Cache Next.js build
-        uses: actions/cache@v4
-        with:
-          path: client/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('client/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-
-
-      # ---------- FRONTEND ----------
+      # --------- FRONTEND (Next.js) ---------
       - name: Install frontend dependencies
         working-directory: ./client
         run: npm ci || npm install
@@ -53,33 +44,31 @@ jobs:
         working-directory: ./client
         run: npm run build
 
-      # ---------- BACKEND ----------
+      # --------- BACKEND (Node.js) ---------
       - name: Install backend dependencies
         working-directory: ./server
         run: npm ci || npm install
 
       - name: Run backend tests
         working-directory: ./server
-        env:
-          NODE_ENV: test
-          MONGODB_URI: ${{ secrets.MONGODB_URI }}
         run: npm test || echo "No tests yet"
 
-      # ---------- DEPLOYMENTS ----------
+      # --------- DEPLOY FRONTEND to Vercel ---------
       - name: Deploy to Vercel (Frontend)
         if: github.ref == 'refs/heads/main' && success()
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./client
-          prod: true
+        run: |
+          echo "🚀 Deploying Next.js app to Vercel..."
+          cd client
+          npx vercel --prod \
+            --token ${{ secrets.VERCEL_TOKEN }} \
+            --org ${{ secrets.VERCEL_ORG_ID }} \
+            --project ${{ secrets.VERCEL_PROJECT_ID }}
 
+      # --------- DEPLOY BACKEND to Render ---------
       - name: Deploy to Render (Backend)
         if: github.ref == 'refs/heads/main' && success()
         env:
           RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
         run: |
-          echo "🚀 Triggering Render deploy..."
+          echo "🚀 Triggering Render deployment..."
           curl -X POST "$RENDER_DEPLOY_HOOK"
