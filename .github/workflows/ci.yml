@@ -52,12 +52,12 @@ jobs:
         run: npm test || echo "No tests yet"
 
       # ---------- DEPLOYMENTS ----------
+      # ---------- DEPLOYMENTS ----------
       - name: Deploy to Vercel (Frontend)
         if: github.ref == 'refs/heads/main' && success()
-        working-directory: ./client
         run: |
           echo "🚀 Deploying Next.js app to Vercel..."
-          npx vercel deploy --prod --yes --token ${{ secrets.VERCEL_TOKEN }}
+          npx vercel deploy --prod --yes --token ${{ secrets.VERCEL_TOKEN }} --cwd $GITHUB_WORKSPACE/client
 
       - name: Deploy to Render (Backend)
         if: github.ref == 'refs/heads/main' && success()
