@@ -59,7 +59,7 @@ jobs:
           cd client
           npx vercel pull --yes --environment=production --token $VERCEL_TOKEN
           npx vercel build --token $VERCEL_TOKEN
-          npx vercel deploy --prebuilt --prod --yes --token $VERCEL_TOKEN
+          npx vercel deploy --prod --yes --token $VERCEL_TOKEN
 
       # ---------- 6. Deploy Backend to Render ----------
       - name: Deploy Backend to Render
