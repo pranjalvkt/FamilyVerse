@@ -63,7 +63,7 @@ jobs:
           echo "🚀 Deploying Next.js app to Vercel..."
           npx vercel pull --yes --token=$VERCEL_TOKEN
           npx vercel build --token=$VERCEL_TOKEN
-          npx vercel deploy --prebuilt --prod --yes --token=$VERCEL_TOKEN
+          npx vercel deploy --prod --yes --token=$VERCEL_TOKEN
 
       # ---------------- DEPLOY BACKEND (RENDER) ----------------
       - name: Deploy backend to Render
