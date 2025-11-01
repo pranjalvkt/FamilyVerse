@@ -59,10 +59,7 @@ jobs:
         run: |
           echo "🚀 Deploying Next.js app to Vercel..."
           cd client
-          npx vercel --prod \
-            --token ${{ secrets.VERCEL_TOKEN }} \
-            --org ${{ secrets.VERCEL_ORG_ID }} \
-            --project ${{ secrets.VERCEL_PROJECT_ID }}
+          npx vercel deploy --prebuilt --prod --yes --token ${{ secrets.VERCEL_TOKEN }}
 
       # --------- DEPLOY BACKEND to Render ---------
       - name: Deploy to Render (Backend)
