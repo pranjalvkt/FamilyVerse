@@ -8,6 +8,10 @@ export const authOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
+  
+  session: {
+    strategy: "jwt",
+  },
 
   callbacks: {
     // Triggered after successful Google login
@@ -63,11 +67,11 @@ export const authOptions = {
     },
   },
 
-  // Optional pages customization
   pages: {
     signIn: "/login",
   },
 
+  secret: process.env.NEXTAUTH_SECRET,
   // For security & URL base
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
